@@ -1,0 +1,37 @@
+name: Auto‑Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: SSH & Deploy
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+
+            # Go to your apps dir
+            TARGET=/scratch/rahuld/mscc_deploy/
+            mkdir -p $TARGET
+            cd $TARGET
+
+            # Clone or update the repo
+            if [ -d repo ]; then
+              cd repo
+              git fetch --all
+              git reset --hard origin/main
+            else
+              git clone https://github.com/rahul-dethe/mscc_deploy.git repo
+              cd repo
+            fi
+
