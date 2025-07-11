@@ -23,3 +23,7 @@ jobs:
       - name: SSH and run remote command
         run: |
           ssh -i ~/.ssh/id_rsa -p 4422 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "echo '✅ SSH connection successful!'"
+
+      - name: SSH and run remote command
+        run: |
+          ssh -i ~/.ssh/id_rsa -p 4422 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "echo '✅ SSH connection successful!'"
