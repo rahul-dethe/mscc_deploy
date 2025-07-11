@@ -1,37 +1,25 @@
-name: Auto‑Deploy
+name: SSH to Remote Host
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master  # or your branch
 
 jobs:
-  deploy:
+  ssh-remote:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-      - name: SSH & Deploy
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            set -e
+      - name: Setup SSH key and known hosts
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p 4422 ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
 
-            # Go to your apps dir
-            TARGET=/scratch/rahuld/mscc_deploy/
-            mkdir -p $TARGET
-            cd $TARGET
-
-            # Clone or update the repo
-            if [ -d repo ]; then
-              cd repo
-              git fetch --all
-              git reset --hard origin/main
-            else
-              git clone https://github.com/rahul-dethe/mscc_deploy.git repo
-              cd repo
-            fi
-
+      - name: SSH and run remote command
+        run: |
+          ssh -i ~/.ssh/id_rsa -p 4422 ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "echo '✅ SSH connection successful!'"
